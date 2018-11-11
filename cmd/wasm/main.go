@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	log.Println("hello world")
+	log.Println("Hello, world.")
 
 	select {}
 }

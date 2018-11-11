@@ -12,3 +12,31 @@ go_binary(
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
 )
+
+
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+
+pkg_tar(
+    name = "frontend_tar",
+    srcs = ["//cmd/wasm:wasm"],
+    mode = "0o644",
+    package_dir = "/public",
+)
+
+# Include it in our base image as a tar.
+container_image(
+    name = "wasm_image",
+    base = "@go_image_base//image",
+    tars = [":frontend_tar"],
+#    user = "nonroot",
+)
+
+# Simple go program to print out the username and uid.
+go_image(
+    name = "image",
+    srcs = ["main.go"],
+    base = "//cmd/server:wasm_image",
+    visibility = ["//visibility:public"],
+)
